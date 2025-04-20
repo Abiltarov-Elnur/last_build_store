@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Вход</title>
+</head>
+<body>
+  <h1>Вход в систему</h1>
+  <form id="login-form">
+    <input type="email" id="email" placeholder="Email" required><br>
+    <input type="password" id="password" placeholder="Пароль" required><br>
+    <button type="submit">Войти</button>
+  </form>
+
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await res.json();
+
+      if (data.error) {
+        alert('Ошибка: ' + data.error);
+      } else {
+        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('role', data.role);
+
+        alert(`Добро пожаловать, ${data.user.name} (${data.role})`);
+
+        if (data.role === 'admin') location.href = '/admin.html';
+        if (data.role === 'client') location.href = '/catalog.html';
+        if (data.role === 'seller') location.href = '/seller-panel.html';
+      }
+    });
+  </script>
+</body>
+</html>
