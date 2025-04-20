@@ -6,40 +6,54 @@
 </head>
 <body>
   <h1>Вход в систему</h1>
-  <form id="login-form">
-    <input type="email" id="email" placeholder="Email" required><br>
-    <input type="password" id="password" placeholder="Пароль" required><br>
+  <form id="loginForm">
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Пароль" required />
     <button type="submit">Войти</button>
   </form>
-
   <script>
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-
+  
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
-
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-
-      const data = await res.json();
-
-      if (data.error) {
-        alert('Ошибка: ' + data.error);
-      } else {
-        localStorage.setItem('user', JSON.stringify(data.user));
-        localStorage.setItem('role', data.role);
-
-        alert(`Добро пожаловать, ${data.user.name} (${data.role})`);
-
-        if (data.role === 'admin') location.href = '/admin.html';
-        if (data.role === 'client') location.href = '/catalog.html';
-        if (data.role === 'seller') location.href = '/seller-panel.html';
+  
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password })
+        });
+  
+        const data = await res.json();
+  
+        if (!res.ok) {
+          alert(data.error || 'Ошибка входа');
+          return;
+        }
+  
+        // 👇 Показываем кто ты
+        alert(`Вы вошли как: ${data.role}`);
+  
+        // 👇 Перенаправление по ролям
+        if (data.role === 'admin') {
+          window.location.href = '/admin.html';
+        } else if (data.role === 'seller') {
+          window.location.href = '/seller-panel.html';
+        } else if (data.role === 'client') {
+          window.location.href = '/catalog.html';
+        } else {
+          alert('Неизвестная роль');
+        }
+  
+      } catch (err) {
+        console.error(err);
+        alert('Ошибка соединения с сервером');
       }
     });
   </script>
+  
 </body>
 </html>
